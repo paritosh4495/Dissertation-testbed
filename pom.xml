@@ -16,7 +16,8 @@
     </properties>
 
     <modules>
-
+        <module>inventory-service</module>
+        <module>order-service</module>
     </modules>
 
 </project>

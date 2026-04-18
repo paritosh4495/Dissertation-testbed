@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @ConfigurationPropertiesScan
 @SpringBootApplication
+@org.springframework.data.jpa.repository.config.EnableJpaAuditing
 public class InventoryServiceApplication {
 
     public static void main(String[] args) {
