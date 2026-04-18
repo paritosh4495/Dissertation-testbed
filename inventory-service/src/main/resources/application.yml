@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: inventory-service
+
+  # DATABASE
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/inventory}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: InventoryHikariPool
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  # STRUCTURED LOGGING
+  logging:
+    structured:
+      format:
+        console: ecs
+
+server:
+  port: 8081
+  shutdown: graceful
+
+# ACTUATOR & OBSERVABILITY
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+  info:
+    git:
+      mode: full
+    env:
+      enabled: true
+    build:
+      enabled: true
