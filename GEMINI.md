@@ -8,106 +8,94 @@ simulation is complete and stable, the project will be extended with fault injec
 and an LLM-based diagnostic agent — but that comes later.
 
 
-## Architecture & Technologies
-- **Java 25**: Utilizes the latest Java features.
-- **Spring Boot 3.5.x**: Core framework for microservices.
-- **Microservices**:
-  - `inventory-service`: Manages product inventory and stock.
-  - `order-service`: Manages customer orders.
-- **Persistence**: Spring Data JPA with PostgreSQL for each service.
-- **Database Migrations**: Flyway.
-- **Reliability**: Resilience4j for circuit breakers and fault tolerance.
+## Architecture
+The system consists of three primary services:
+1.  **Inventory Service (Port 8081):** Manages product catalog and stock levels. Supports stock reservation, committing, and releasing.
+2.  **Order Service (Port 8082):** Orchestrates the order creation process. It coordinates with the Inventory and Payment services using a SAGA-like pattern (Orchestration).
+3.  **Payment Service (Port 8083):** A mock service that simulates payment authorization.
+
+## Technology Stack
+- **Language:** Java 25
+- **Framework:** Spring Boot 3.5.13
+- **Data Access:** Spring Data JPA (PostgreSQL)
+- **Database Migrations:** Flyway
+- **Communication:** Spring RestClient (Synchronous HTTP)
+- **Resilience:** Resilience4j (Circuit Breakers)
 - **Observability**:
   - Spring Boot Actuator.
   - Micrometer with Prometheus registry.
   - Structured Logging in ECS (Elastic Common Schema) format.
-- **Testing**:
-  - JUnit 5 for unit and integration tests.
-  - RestAssured for API testing.
-  - Testcontainers for integration testing with real PostgreSQL instances.
-- **Infrastructure**: Docker Compose for local development and deployment.
-- **Automation**: `Taskfile.yml` for common development tasks.
+- **Testing:** Testcontainers (PostgreSQL), RestAssured, JUnit 5
+- **Build/Deployment:** Maven, Docker, Docker Compose, Taskfile
 
-
-## Project Structure
-
-```
-testbed/                          ← root Maven multi-module project
-|__ .github 
-    -- workflows/                   ← GitHub Actions CI/CD pipelines
-
-├── pom.xml                       ← parent POM (manages versions for all modules)
-├── inventory-service/            ← Spring Boot module
-├── order-service/                ← Spring Boot module
-├── payment-service/              ← Spring Boot module (skeleton not yet created)
-├── deployment/
-│   └── docker-compose/
-│       ├── infra.yml             ← PostgreSQL container
-│       ├── apps.yml              ← application containers
-│       └── init.sql              ← creates inventory + order databases
-└── Taskfile.yml                  ← centralised task runner
-   
-```
-
+## Key Workflows
+### Order Creation (Orchestration SAGA)
+1. `order-service` receives a `CreateOrderRequest`.
+2. It initializes an Order with `PENDING` status.
+3. It calls `inventory-service` to reserve stock.
+   - If stock reservation fails, order status becomes `INVENTORY_REJECTED`.
+4. If reservation succeeds, it calls `payment-service` to authorize payment.
+   - If payment succeeds, order status becomes `CONFIRMED`.
+   - If payment fails, it calls `inventory-service` to **release** the reserved stock (Compensation) and sets order status to `PAYMENT_FAILED`.
 
 ### Infrastructure
 - **PostgreSQL:** A single container hosts two logical databases — `inventory` and `order`.
   Initialised via `deployment/docker-compose/init.sql`.
 
 
+
 ## Building and Running
 
+### Prerequisites
+- Java 25
+- Docker and Docker Compose
+- [Task](https://taskfile.dev/) (optional, but recommended)
 
-### Key Commands
-The project uses `Taskfile.yml` to automate common operations.
-
-- **Run all tests**:
-  ```powershell
-  task test
-  # OR
+### Commands
+- **Build all modules:**
+  ```bash
   ./mvnw clean verify
   ```
-- **Build Docker images**:
-  ```powershell
+  *Note: This runs tests which require Docker (Testcontainers).*
+
+- **Build Docker images:**
+  ```bash
   task build
   ```
-- **Start Infrastructure (PostgreSQL)**:
-  ```powershell
+
+- **Start Infrastructure (PostgreSQL):**
+  ```bash
   task start_infra
   ```
-- **Stop Infrastructure**:
-  ```powershell
-  task stop_infra
-  ```
-- **Start All Services and Infrastructure**:
-  ```powershell
+
+- **Start all services (Full Stack):**
+  ```bash
   task start
   ```
-- **Stop All**:
-  ```powershell
+
+- **Stop all services:**
+  ```bash
   task stop
   ```
 
+- **Run individual service locally:**
+  ```bash
+  cd [service-name]
+  ../mvnw spring-boot:run
+  ```
+
 ## Development Conventions
-
-### Coding Style
-- **Lombok**: Extensively used to reduce boilerplate (e.g., `@Data`, `@Slf4j`, `@RequiredArgsConstructor`).
-- **Modern Java**: Use Java 25 idiomatic features where applicable.
-- **DTOs**: Used for request/response bodies in controllers.
-- **Global Exception Handling**: Implemented via `@RestControllerAdvice`.
-
-### Database
-- Flyway migrations are located in `src/main/resources/db/migration`.
-- Naming convention: `V1__init_schema.sql`, `V2__seed_data.sql`, etc.
-- Entity-to-Database validation (`ddl-auto: validate`) is used in production/local profiles.
-
-### Testing
-- Integration tests should extend `AbstractIT`.
-- `AbstractIT` uses `TestcontainersConfiguration` to start a PostgreSQL container.
-- Use `RestAssured` for asserting API responses in integration tests.
-- Test data should be managed via `src/test/resources/test-data.sql` or specific Flyway migrations for tests.
-
-### Observability
-- All services have Actuator endpoints enabled on port `8081` (Inventory) and `8082` (Order).
-- Structured logging is enabled by default to facilitate log analysis.
-- Graceful shutdown is enabled for all services.
+- **Package Structure:** Standard Spring Boot DDD-lite:
+  - `domain`: JPA Entities and Enums.
+  - `dto`: Request and Response objects.
+  - `repository`: Spring Data JPA repositories.
+  - `service`: Business logic interfaces and implementations.
+  - `web`: REST Controllers and Exception Handlers.
+  - `client`: External service clients (in `order-service`).
+  - `mapper`: MapStruct or manual mappers (Lombok is used extensively).
+- **Resilience:** All external calls should be wrapped in Resilience4j Circuit Breakers.
+- **Testing:**
+  - Unit tests for services and logic.
+  - Integration tests (`AbstractIT`) using Testcontainers to spin up real PostgreSQL instances.
+  - API verification using RestAssured.
+- **Configuration:** Externalized via `application.yml`. Profile-specific configurations (e.g., `application-docker.yml`) are used for containerized environments.

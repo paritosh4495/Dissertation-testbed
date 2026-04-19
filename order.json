@@ -1,0 +1,9 @@
+{
+  "customerId": "CUST-001",
+  "items": [
+    {
+      "productCode": "BK-EJ002",
+      "quantity": 1
+    }
+  ]
+}
