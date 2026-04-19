@@ -22,6 +22,7 @@ tasks:
     cmds:
       - "{{.MVNW}} -pl inventory-service spring-boot:build-image -DskipTests"
       - "{{.MVNW}} -pl order-service spring-boot:build-image -DskipTests"
+      - "{{.MVNW}} -pl payment-service spring-boot:build-image -DskipTests"
 
 
   start_infra:

@@ -2,11 +2,15 @@ package com.dissertation.orderservice.service;
 
 import com.dissertation.orderservice.client.inventory.*;
 import com.dissertation.orderservice.client.payment.PaymentClient;
+import com.dissertation.orderservice.client.payment.PaymentRequest;
+import com.dissertation.orderservice.client.payment.PaymentResponse;
+import com.dissertation.orderservice.client.payment.PaymentStatus;
 import com.dissertation.orderservice.domain.Order;
 import com.dissertation.orderservice.domain.OrderItem;
 import com.dissertation.orderservice.domain.OrderStatus;
 import com.dissertation.orderservice.dto.CreateOrderRequest;
 import com.dissertation.orderservice.dto.OrderResponse;
+import com.dissertation.orderservice.exception.OrderNotFoundException;
 import com.dissertation.orderservice.mapper.OrderMapper;
 import com.dissertation.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -83,11 +87,26 @@ public class OrderServiceImpl implements OrderService {
 
             // 3. Process Payment
             try {
-                paymentClient.processPayment(orderNumber, request.getCustomerId(), totalAmount);
+                PaymentRequest paymentRequest = PaymentRequest.builder()
+                        .orderNumber(orderNumber)
+                        .customerId(request.getCustomerId())
+                        .amount(totalAmount)
+                        .build();
+
+                PaymentResponse paymentResponse = paymentClient.authorizePayment(paymentRequest);
                 
-                // 4. Confirm Order
-                order.setStatus(OrderStatus.CONFIRMED);
-                log.info("Order {} confirmed successfully", orderNumber);
+                if (paymentResponse != null && paymentResponse.getStatus() == PaymentStatus.AUTHORIZED) {
+                    // 4. Confirm Order
+                    order.setStatus(OrderStatus.CONFIRMED);
+                    log.info("Order {} confirmed successfully", orderNumber);
+                } else {
+                    log.warn("Payment declined for order {}: {}", orderNumber, 
+                            paymentResponse != null ? paymentResponse.getMessage() : "No response");
+                    
+                    // COMPENSATE: Release Stock
+                    inventoryClient.releaseStock(stockRequest);
+                    order.setStatus(OrderStatus.PAYMENT_FAILED);
+                }
                 
             } catch (Exception e) {
                 log.error("Payment failed for order {}: {}", orderNumber, e.getMessage());
@@ -111,6 +130,19 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getOrderByNumber(String orderNumber) {
         return orderRepository.findByOrderNumber(orderNumber)
                 .map(orderMapper::toResponse)
-                .orElseThrow(() -> new RuntimeException("Order not found: " + orderNumber));
+                .orElseThrow(() -> new OrderNotFoundException("Order not found: " + orderNumber));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getOrdersByCustomerId(String customerId) {
+        log.info("Fetching orders for customer: {}", customerId);
+        List<Order> orders = orderRepository.findByCustomerId(customerId);
+        if (orders.isEmpty()) {
+            throw new OrderNotFoundException("No orders found for customer: " + customerId);
+        }
+        return orders.stream()
+                .map(orderMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }

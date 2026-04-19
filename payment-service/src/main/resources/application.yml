@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: payment-service
+
+  # STRUCTURED LOGGING
+  logging:
+    structured:
+      format:
+        console: ecs
+
+server:
+  port: 8083
+  shutdown: graceful
+
+# ACTUATOR & OBSERVABILITY
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  info:
+    git:
+      mode: full
+    env:
+      enabled: true
+    build:
+      enabled: true

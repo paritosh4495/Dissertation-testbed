@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -29,5 +31,11 @@ public class OrderController {
     public ResponseEntity<OrderResponse> getOrderByNumber(@PathVariable String orderNumber) {
         log.info("Received request to fetch order: {}", orderNumber);
         return ResponseEntity.ok(orderService.getOrderByNumber(orderNumber));
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<OrderResponse>> getOrdersByCustomerId(@PathVariable String customerId) {
+        log.info("Received request to fetch orders for customer: {}", customerId);
+        return ResponseEntity.ok(orderService.getOrdersByCustomerId(customerId));
     }
 }
