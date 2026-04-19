@@ -160,10 +160,20 @@ public class ProductServiceImpl implements ProductService {
     public StockOperationResponse reserveStock(StockOperationRequest request) {
         log.info("Attempting to reserve stock for order: {}", request.getOrderId());
         List<String> missingItems = new ArrayList<>();
+        List<ReservedItemResponse> reservedItems = new ArrayList<>();
 
         for (OrderItemRequest item : request.getItems()) {
             int updated = productRepository.reserveStock(item.getProductCode(), item.getQuantity());
-            if (updated == 0) {
+            if (updated > 0) {
+                Product product = productRepository.findByCodeAndStatusNot(item.getProductCode(), ProductStatus.DISCONTINUED)
+                        .orElseThrow(() -> new ProductNotFoundException(item.getProductCode()));
+                
+                reservedItems.add(ReservedItemResponse.builder()
+                        .productCode(item.getProductCode())
+                        .quantity(item.getQuantity())
+                        .unitPrice(product.getPrice())
+                        .build());
+            } else {
                 missingItems.add(item.getProductCode());
             }
         }
@@ -177,6 +187,7 @@ public class ProductServiceImpl implements ProductService {
                 .orderId(request.getOrderId())
                 .success(true)
                 .message("Stock reserved successfully")
+                .reservedItems(reservedItems)
                 .build();
     }
 

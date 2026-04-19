@@ -15,5 +15,6 @@ public class StockOperationResponse {
     private String orderId;
     private boolean success;
     private String message;
+    private List<ReservedItemResponse> reservedItems;
     private List<String> missingItems; // List of product codes that failed
 }
