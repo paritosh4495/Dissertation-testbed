@@ -1,0 +1,4 @@
+{
+  "status": 201,
+  "body": "{\"orderNumber\":\"ORD-87F341B7\",\"customerId\":\"CUST-VERIFY\",\"status\":\"INVENTORY_REJECTED\",\"totalAmount\":0,\"createdAt\":null,\"items\":[]}"
+}

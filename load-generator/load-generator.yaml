@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  namespace: bookstore-testbed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+    spec:
+      containers:
+      - name: load-generator
+        image: load-generator:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGET_URL
+          value: "http://order-service:8082/api/orders"
+        - name: INTERVAL_SECONDS
+          value: "1.0"
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "64Mi"
+          requests:
+            cpu: "10m"
+            memory: "32Mi"

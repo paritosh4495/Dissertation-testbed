@@ -42,9 +42,10 @@ public class F2CpuSaturationFault implements Fault {
     public synchronized void activate() {
         if (active.compareAndSet(false, true)) {
             int cores = Runtime.getRuntime().availableProcessors();
-            log.info("Activating F2: Spawning {} worker threads", cores);
+            int threadCount = cores * 4; // Increased multiplier for container saturation
+            log.info("Activating F2: Spawning {} worker threads", threadCount);
             
-            for (int i = 0; i < cores; i++) {
+            for (int i = 0; i < threadCount; i++) {
                 Thread worker = new Thread(this::cpuIntensiveTask, "fault-f2-worker-" + i);
                 worker.setDaemon(true);
                 workers.add(worker);
