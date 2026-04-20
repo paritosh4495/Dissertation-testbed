@@ -1,5 +1,6 @@
 name: Inventory Service CI/CD Pipeline
 
+# This workflow handles CI/CD for the Inventory Service
 on:
   push:
     branches:
