@@ -1,7 +1,21 @@
 INSERT INTO products (code, name, author, isbn, description, price, genre, format, stock_quantity, reserved_quantity, status)
-VALUES 
-('BK-TH001', 'The Hobbit', 'J.R.R. Tolkien', '9780261102217', 'A classic high-fantasy novel.', 10.99, 'Fantasy', 'PAPERBACK', 50, 0, 'AVAILABLE'),
-('BK-EJ002', 'Effective Java', 'Joshua Bloch', '9780134685991', 'Best practices for the Java platform.', 45.00, 'Technology', 'HARDCOVER', 20, 0, 'AVAILABLE'),
-('BK-HP003', 'Harry Potter and the Philosopher''s Stone', 'J.K. Rowling', '9780747532699', 'The first book in the Harry Potter series.', 8.99, 'Fantasy', 'PAPERBACK', 100, 0, 'AVAILABLE'),
-('BK-1984', '1984', 'George Orwell', '9780451524935', 'A dystopian social science fiction novel.', 7.50, 'Dystopian', 'PAPERBACK', 0, 0, 'AVAILABLE'),
-('BK-GTM', 'Green Eggs and Ham', 'Dr. Seuss', '9780394800165', 'A children''s book by Dr. Seuss.', 5.99, 'Children', 'HARDCOVER', 15, 0, 'AVAILABLE');
+VALUES
+    ('BK-LOTR001', 'The Lord of the Rings', 'J.R.R. Tolkien', '9780618640157', 'Epic fantasy novel series.', 29.99, 'Fantasy', 'HARDCOVER', 1000, 0, 'AVAILABLE'),
+    ('BK-PRIDE', 'Pride and Prejudice', 'Jane Austen', '9780141439518', 'A classic romantic novel of manners.', 12.99, 'Romance', 'PAPERBACK', 2000, 0, 'AVAILABLE'),
+    ('BK-GREATGATSBY', 'The Great Gatsby', 'F. Scott Fitzgerald', '9780743273565', 'A tragic story of the American dream.', 10.50, 'Fiction', 'PAPERBACK', 1500, 0, 'AVAILABLE'),
+    ('BK-MOCKINGJAY', 'Mockingjay', 'Suzanne Collins', '9780439023511', 'The third book in the Hunger Games series.', 15.00, 'Dystopian', 'HARDCOVER', 2000, 0, 'AVAILABLE'),
+    ('BK-TOGONEWITHWIND', 'Gone with the Wind', 'Margaret Mitchell', '9781451635621', 'A historical romance set during the American Civil War.', 18.99, 'Historical Fiction', 'HARDCOVER', 5000, 0, 'AVAILABLE'),
+    ('BK-CATCHER', 'The Catcher in the Rye', 'J.D. Salinger', '9780316769488', 'A story about teenage alienation and loss of innocence.', 9.99, 'Fiction', 'PAPERBACK', 3000, 0, 'AVAILABLE'),
+    ('BK-LITTLEWOMEN', 'Little Women', 'Louisa May Alcott', '9780143039493', 'A novel about the four March sisters.', 13.49, 'Fiction', 'PAPERBACK', 4000, 0, 'AVAILABLE'),
+    ('BK-DANBROWN', 'The Da Vinci Code', 'Dan Brown', '9780385504201', 'A gripping thriller centered around a religious mystery.', 19.99, 'Thriller', 'HARDCOVER', 1000, 0, 'AVAILABLE'),
+    ('BK-DARKMATER', 'Dark Matter', 'Blake Crouch', '9781101904220', 'A mind-bending science fiction thriller.', 14.99, 'Sci-Fi', 'PAPERBACK', 3000, 0, 'AVAILABLE'),
+    ('BK-WINTERSONG', 'Wintersong', 'S.Jae-Jones', '9781250098250', 'A fantasy novel inspired by the Goblin King legend.', 17.00, 'Fantasy', 'HARDCOVER', 2000, 0, 'AVAILABLE'),
+    ('BK-DRACULA', 'Dracula', 'Bram Stoker', '9780141439847', 'A Gothic horror novel about Count Dracula.', 8.49, 'Horror', 'PAPERBACK', 1000, 0, 'AVAILABLE'),
+    ('BK-FRANKENSTEIN', 'Frankenstein', 'Mary Shelley', '9780141439472', 'The classic tale of science and madness.', 6.99, 'Horror', 'PAPERBACK', 1500, 0, 'AVAILABLE'),
+    ('BK-SHINING', 'The Shining', 'Stephen King', '9780385121675', 'A horror novel set in a haunted hotel.', 16.50, 'Horror', 'HARDCOVER', 2000, 0, 'AVAILABLE'),
+    ('BK-JURASSICPARK', 'Jurassic Park', 'Michael Crichton', '9780345538987', 'A thriller about genetic engineering and dinosaurs.', 12.99, 'Thriller', 'HARDCOVER', 1000, 0, 'AVAILABLE'),
+    ('BK-NEUROMANCER', 'Neuromancer', 'William Gibson', '9780441569595', 'A science fiction novel that pioneered cyberpunk.', 14.99, 'Sci-Fi', 'HARDCOVER', 2000, 0, 'AVAILABLE'),
+    ('BK-DUNE', 'Dune', 'Frank Herbert', '9780441013593', 'A science fiction epic set on a desert planet.', 24.99, 'Sci-Fi', 'HARDCOVER', 1000, 0, 'AVAILABLE'),
+    ('BK-WATCHMEN', 'Watchmen', 'Alan Moore', '9780930289232', 'A graphic novel about a group of former superheroes.', 22.00, 'Graphic Novel', 'PAPERBACK', 3000, 0, 'AVAILABLE'),
+    ('BK-CATCH22', 'Catch-22', 'Joseph Heller', '9781451626650', 'A satirical novel about the absurdity of war.', 14.00, 'War Fiction', 'PAPERBACK', 4000, 0, 'AVAILABLE'),
+    ('BK-MEMOIRS', 'The Princess Diaries', 'Meg Cabot', '9780060724528', 'A light-hearted series about a teenage princess.', 9.99, 'Young Adult', 'PAPERBACK', 5000, 0, 'AVAILABLE');
