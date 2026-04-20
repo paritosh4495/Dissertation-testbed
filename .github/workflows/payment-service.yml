@@ -1,16 +1,16 @@
-name: Inventory Service CI/CD Pipeline
+name: Payment Service CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
     paths:
-      - inventory-service/**
+      - payment-service/**
   pull_request:
     branches:
       - main
     paths:
-      - inventory-service/**
+      - payment-service/**
 
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./inventory-service
+        working-directory: ./payment-service
     steps:
       - uses: actions/checkout@v5
       - name: Setup Java 25
@@ -32,7 +32,7 @@ jobs:
         run: |
           chmod +x ../mvnw
           ../mvnw -ntp verify 
-          
+  
 
   docker:
     name: Build & Push Docker Image
@@ -41,9 +41,9 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     defaults:
       run:
-        working-directory: ./inventory-service
+        working-directory: ./payment-service
     env:
-      DOCKER_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/csc8499-inventory-service
+      DOCKER_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/csc8499-payment-service
     steps:
       - uses: actions/checkout@v5
       - name: Setup Java 25
