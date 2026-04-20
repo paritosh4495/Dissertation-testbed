@@ -63,4 +63,5 @@ jobs:
           chmod +x ../mvnw
           ../mvnw -ntp spring-boot:build-image -DskipTests \
             -Dspring-boot.build-image.imageName=${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
 
