@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+  namespace: bookstore-testbed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-service
+  template:
+    metadata:
+      labels:
+        app: inventory-service
+    spec:
+      containers:
+      - name: inventory-service
+        image: paritosh4495/csc8499-inventory-service:latest
+        imagePullPolicy: Always
+        env:
+        - name: DB_URL
+          value: jdbc:postgresql://postgres-db:5432/inventory
+        - name: DB_USERNAME
+          value: postgres
+        - name: DB_PASSWORD
+          value: postgres
+        - name: _JAVA_OPTIONS
+          value: "-Xms512m -Xmx512m"
+        ports:
+        - containerPort: 8081
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "0.5"
+          limits:
+            memory: "700Mi"
+            cpu: "1.0"
+        readinessProbe:
+          httpGet:
+            path: "/actuator/health/readiness"
+            port: 8081
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: "/actuator/health/liveness"
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          failureThreshold: 15 # Relaxed for fault injection
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-service
+  namespace: bookstore-testbed
+spec:
+  selector:
+    app: inventory-service
+  ports:
+  - port: 8081
+    targetPort: 8081
+  type: ClusterIP

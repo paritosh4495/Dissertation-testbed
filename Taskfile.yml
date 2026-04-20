@@ -57,6 +57,30 @@ tasks:
       - task: sleep
       - task: start
 
+  k8s_start:
+    desc: "Deploy the stack to Kubernetes"
+    cmds:
+      - "kubectl apply -f deployment/kubernetes/namespace.yaml"
+      - "kubectl apply -f deployment/kubernetes/secrets.yaml"
+      - "kubectl apply -f deployment/kubernetes/postgres.yaml"
+      - "kubectl wait --for=condition=ready pod -l app=postgres -n bookstore-testbed --timeout=60s"
+      - "kubectl apply -f deployment/kubernetes/inventory-service.yaml"
+      - "kubectl apply -f deployment/kubernetes/payment-service.yaml"
+      - "kubectl apply -f deployment/kubernetes/order-service.yaml"
+
+  k8s_stop:
+    desc: "Delete the stack from Kubernetes"
+    cmds:
+      - "kubectl delete -f deployment/kubernetes/order-service.yaml --ignore-not-found"
+      - "kubectl delete -f deployment/kubernetes/inventory-service.yaml --ignore-not-found"
+      - "kubectl delete -f deployment/kubernetes/payment-service.yaml --ignore-not-found"
+      - "kubectl delete -f deployment/kubernetes/postgres.yaml --ignore-not-found"
+      - "kubectl delete -f deployment/kubernetes/namespace.yaml --ignore-not-found"
+
+  k8s_status:
+    desc: "Show status of the Kubernetes deployment"
+    cmds:
+      - "kubectl get all -n bookstore-testbed"
 
   sleep:
     vars:

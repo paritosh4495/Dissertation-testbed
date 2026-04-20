@@ -28,6 +28,8 @@ spring:
       format:
         console: ecs
 
+
+
 server:
   port: 8081
   shutdown: graceful
@@ -55,3 +57,7 @@ management:
       enabled: true
     build:
       enabled: true
+
+
+inventory:
+  page-size: 10

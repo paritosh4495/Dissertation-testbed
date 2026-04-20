@@ -9,11 +9,9 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public record ApplicationProperties(
         @NotBlank
-        @DefaultValue("http://localhost:8081")
         String inventoryServiceUrl,
 
         @NotBlank
-        @DefaultValue("http://localhost:8083")
         String paymentServiceUrl
 ) {
 }

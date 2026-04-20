@@ -1,7 +1,5 @@
 name: inventory-service.yml
 
-
-
 on:
     push:
         branches:

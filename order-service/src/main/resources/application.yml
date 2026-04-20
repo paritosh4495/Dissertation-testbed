@@ -28,6 +28,10 @@ spring:
         format:
           console: ecs
 
+order:
+  inventory-service-url: http://localhost:8081
+  payment-service-url: http://localhost:8083
+
 
 server:
   port: 8082

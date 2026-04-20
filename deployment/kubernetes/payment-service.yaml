@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: bookstore-testbed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+      - name: payment-service
+        image: paritosh4495/csc8499-payment-service:latest
+        imagePullPolicy: Always
+        env:
+        - name: _JAVA_OPTIONS
+          value: "-Xms512m -Xmx512m"
+        ports:
+        - containerPort: 8083
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "0.5"
+          limits:
+            memory: "700Mi"
+            cpu: "1.0"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8083
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8083
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          failureThreshold: 15 # Relaxed for fault injection
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: bookstore-testbed
+spec:
+  selector:
+    app: payment-service
+  ports:
+  - port: 8083
+    targetPort: 8083
+  type: ClusterIP
