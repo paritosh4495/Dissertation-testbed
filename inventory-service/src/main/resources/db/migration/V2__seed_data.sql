@@ -18,4 +18,5 @@ VALUES
     ('BK-DUNE', 'Dune', 'Frank Herbert', '9780441013593', 'A science fiction epic set on a desert planet.', 24.99, 'Sci-Fi', 'HARDCOVER', 1000, 0, 'AVAILABLE'),
     ('BK-WATCHMEN', 'Watchmen', 'Alan Moore', '9780930289232', 'A graphic novel about a group of former superheroes.', 22.00, 'Graphic Novel', 'PAPERBACK', 3000, 0, 'AVAILABLE'),
     ('BK-CATCH22', 'Catch-22', 'Joseph Heller', '9781451626650', 'A satirical novel about the absurdity of war.', 14.00, 'War Fiction', 'PAPERBACK', 4000, 0, 'AVAILABLE'),
-    ('BK-MEMOIRS', 'The Princess Diaries', 'Meg Cabot', '9780060724528', 'A light-hearted series about a teenage princess.', 9.99, 'Young Adult', 'PAPERBACK', 5000, 0, 'AVAILABLE');
+    ('BK-MEMOIRS', 'The Princess Diaries', 'Meg Cabot', '9780060724528', 'A light-hearted series about a teenage princess.', 9.99, 'Young Adult', 'PAPERBACK', 5000, 0, 'AVAILABLE'),
+    ('BK-LOADGEN', 'Load Test Product', 'System', '0000000000', 'Infinite stock product for load testing.', 1.00, 'System', 'PAPERBACK', 1000000000, 0, 'AVAILABLE');

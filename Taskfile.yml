@@ -82,10 +82,12 @@ tasks:
       - "kubectl apply -f deployment/kubernetes/inventory-service.yaml"
       - "kubectl apply -f deployment/kubernetes/payment-service.yaml"
       - "kubectl apply -f deployment/kubernetes/order-service.yaml"
+      - "kubectl apply -f load-generator/load-generator.yaml"
 
   k8s_stop:
     desc: "Delete the stack from Kubernetes"
     cmds:
+      - "kubectl delete -f load-generator/load-generator.yaml --ignore-not-found"
       - "kubectl delete -f deployment/kubernetes/order-service.yaml --ignore-not-found"
       - "kubectl delete -f deployment/kubernetes/inventory-service.yaml --ignore-not-found"
       - "kubectl delete -f deployment/kubernetes/payment-service.yaml --ignore-not-found"
@@ -96,6 +98,7 @@ tasks:
     desc: "Show status of the Kubernetes deployment"
     cmds:
       - "kubectl get all -n bookstore-testbed"
+
 
   sleep:
     vars:

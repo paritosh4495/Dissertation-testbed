@@ -15,17 +15,21 @@ spec:
     spec:
       containers:
       - name: load-generator
-        image: load-generator:latest
-        imagePullPolicy: IfNotPresent
+        image: paritosh4495/csc8499-load-generator:latest
+        imagePullPolicy: Always
         env:
-        - name: TARGET_URL
+        - name: INVENTORY_URL
+          value: "http://inventory-service:8081/api/products"
+        - name: ORDER_URL
           value: "http://order-service:8082/api/orders"
-        - name: INTERVAL_SECONDS
-          value: "1.0"
+        - name: BROWSE_INTERVAL
+          value: "0.2"
+        - name: ORDER_INTERVAL
+          value: "2.0"
         resources:
           limits:
+            cpu: "100m"
+            memory: "128Mi"
+          requests:
             cpu: "50m"
             memory: "64Mi"
-          requests:miniclear
-            cpu: "10m"
-            memory: "32Mi"
