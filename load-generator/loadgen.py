@@ -24,13 +24,15 @@ def log(message):
 
 def browse_catalog():
     log(f"Starting Browser Thread (Interval: {BROWSE_INTERVAL}s)")
+    count = 0
     while True:
         try:
             req = urllib.request.Request(INVENTORY_URL, method="GET")
             with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
                 if response.status == 200:
-                    # Successfully browsed
-                    pass
+                    count += 1
+                    if count % 50 == 0:
+                        log(f"BROWSE SUCCESS: Completed {count} requests")
         except Exception as e:
             log(f"BROWSE ERROR: {str(e)}")
         
@@ -39,6 +41,7 @@ def browse_catalog():
 def place_order():
     log(f"Starting Buyer Thread (Interval: {ORDER_INTERVAL}s)")
     data = json.dumps(ORDER_PAYLOAD).encode("utf-8")
+    count = 0
     
     while True:
         try:
@@ -46,8 +49,9 @@ def place_order():
             req.add_header("Content-Type", "application/json")
             with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
                 if response.status == 201:
-                    # Order successful
-                    pass
+                    count += 1
+                    if count % 5 == 0:
+                        log(f"ORDER SUCCESS: Placed {count} orders")
         except urllib.error.HTTPError as e:
             log(f"ORDER FAILED: HTTP {e.code} - {e.reason}")
         except Exception as e:
