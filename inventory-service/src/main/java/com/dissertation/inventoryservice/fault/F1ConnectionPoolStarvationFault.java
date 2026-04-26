@@ -2,6 +2,7 @@ package com.dissertation.inventoryservice.fault;
 
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -81,7 +82,15 @@ public class F1ConnectionPoolStarvationFault implements Fault {
 
         // 1. Stop stealing new connections
         if(backgroundStealer!=null) {
-            backgroundStealer.shutdown();
+            backgroundStealer.shutdownNow();
+
+            try {
+                backgroundStealer.awaitTermination(200, TimeUnit.MILLISECONDS);
+
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            backgroundStealer = null;
         }
         //2. Release everything we hold
 
@@ -120,6 +129,14 @@ public class F1ConnectionPoolStarvationFault implements Fault {
             }
         } catch (SQLException e) {
             log.warn("F1: Error closing connection: {}", e.getMessage());
+        }
+    }
+
+    @PreDestroy
+    public void cleanUp(){
+        acquisitionExecutor.shutdownNow();
+        if(backgroundStealer!=null && !backgroundStealer.isShutdown()) {
+            backgroundStealer.shutdownNow();
         }
     }
 }
