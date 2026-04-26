@@ -48,7 +48,8 @@ public class F4ThreadPoolExhaustionFault implements Fault {
     @Override
     public void activate() {
         if (active.compareAndSet(false, true)) {
-            log.info("F4: Thread pool exhaustion trap activated.");
+            log.info("F4: Thread pool exhaustion trap activated. Max threads: {}, Limit: {}",
+                    getMaxThreads(),getBlockLimit());
         }
     }
 
@@ -59,7 +60,6 @@ public class F4ThreadPoolExhaustionFault implements Fault {
             synchronized (lock) {
                 lock.notifyAll();
             }
-            blockedThreadsCount.set(0);
         }
     }
 
@@ -68,31 +68,30 @@ public class F4ThreadPoolExhaustionFault implements Fault {
         if (!active.get()) {
             return false;
         }
+        int limit = getBlockLimit();
 
-        int maxThreads = getMaxThreads();
-        int limit = Math.max(1, maxThreads - MANAGEMENT_BUFFER);
-
-        if (blockedThreadsCount.get() < limit) {
-            int current = blockedThreadsCount.incrementAndGet();
-            log.debug("F4: Blocking thread. Total blocked: {}/{}", current, limit);
-            
-            synchronized (lock) {
-                try {
-                    while (active.get()) {
-                        lock.wait();
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    blockedThreadsCount.decrementAndGet();
-                }
+        int current;
+        do {
+            current = blockedThreadsCount.get();
+            if(current >= limit) {
+                log.warn("F4: Thread trap full ({}/{}). Allowing request through (management buffer).",current,limit);
+                return false;
             }
-            return true;
-        } else {
-            log.warn("F4: Thread trap full ({}/{}). Allowing request to pass to avoid complete deadlock.", 
-                    blockedThreadsCount.get(), limit);
-            return false;
+        } while (!blockedThreadsCount.compareAndSet(current, current + 1));
+
+        synchronized (lock) {
+            try {
+                while (active.get()) {
+                    lock.wait();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                blockedThreadsCount.decrementAndGet();
+            }
         }
+        return true;
+
     }
 
     private int getMaxThreads() {
@@ -101,5 +100,12 @@ public class F4ThreadPoolExhaustionFault implements Fault {
             max = serverProperties.getTomcat().getThreads().getMax();
         }
         return (max != null) ? max : 200; // Default Tomcat max threads
+    }
+
+
+    private int getBlockLimit() {
+        int max = getMaxThreads();
+        int buffer = Math.max(2, max / 4);
+        return max - buffer;
     }
 }
