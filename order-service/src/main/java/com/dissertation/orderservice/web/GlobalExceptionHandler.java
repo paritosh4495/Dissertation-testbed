@@ -1,6 +1,7 @@
 package com.dissertation.orderservice.web;
 
 import com.dissertation.orderservice.exception.OrderNotFoundException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -48,5 +49,16 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("error_code", errorCode);
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
+    }
+
+    @ExceptionHandler(CallNotPermittedException.class)
+    public ProblemDetail handleCircuitBreakerOpen(CallNotPermittedException ex) {
+        log.error("Circuit breaker open — downstream service unavailable: {}", ex.getMessage());
+        return createProblemDetail(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Service Unavailable",
+                "Payment service circuit breaker is OPEN. Failing fast.",
+                "CIRCUIT_BREAKER_OPEN"
+        );
     }
 }

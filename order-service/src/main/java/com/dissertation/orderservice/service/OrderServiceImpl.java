@@ -13,6 +13,7 @@ import com.dissertation.orderservice.dto.OrderResponse;
 import com.dissertation.orderservice.exception.OrderNotFoundException;
 import com.dissertation.orderservice.mapper.OrderMapper;
 import com.dissertation.orderservice.repository.OrderRepository;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -108,12 +109,19 @@ public class OrderServiceImpl implements OrderService {
                     order.setStatus(OrderStatus.PAYMENT_FAILED);
                 }
                 
-            } catch (Exception e) {
-                log.error("Payment failed for order {}: {}", orderNumber, e.getMessage());
-                
-                // COMPENSATE: Release Stock
+            }
+            catch (CallNotPermittedException e){
+                // Circuit breaker is OPEN - payment-service is likely down
+                log.error("Payment service unavailable for order {}: {}", orderNumber, e.getMessage());
                 inventoryClient.releaseStock(stockRequest);
-                
+                order.setStatus(OrderStatus.PAYMENT_FAILED);
+                orderRepository.save(order);
+                throw e;
+            }
+
+            catch (Exception e) {
+                log.error("Payment failed for order {}: {}", orderNumber, e.getMessage());
+                inventoryClient.releaseStock(stockRequest);
                 order.setStatus(OrderStatus.PAYMENT_FAILED);
             }
 
