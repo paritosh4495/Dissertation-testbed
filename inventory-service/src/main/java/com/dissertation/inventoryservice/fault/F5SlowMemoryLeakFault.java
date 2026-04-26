@@ -1,6 +1,7 @@
 package com.dissertation.inventoryservice.fault;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,14 +24,15 @@ public class F5SlowMemoryLeakFault implements Fault {
     private final AtomicBoolean active = new AtomicBoolean(false);
     private final AtomicBoolean criticallyFull = new AtomicBoolean(false);
     private final AtomicLong leakedBytes = new AtomicLong(0);
-    
-    // Thread-safe static collection to ensure objects survive GC cycles
-    private static final List<byte[]> leakContainer = Collections.synchronizedList(new ArrayList<>());
+    private static final double HEAP_SAFETY_CEILING = 0.80;        // Stop at 80% of -Xmx
+
+    // Thread-safe  collection to ensure objects survive GC cycles
+    private  final List<byte[]> leakContainer = Collections.synchronizedList(new ArrayList<>());
     
     private ScheduledExecutorService executor;
     
-    // Configuration: leak 1MB every second
-    private static final int LEAK_SIZE_BYTES = 1024 * 1024; 
+    // Configuration: leak 2MB every second
+    private static final int LEAK_SIZE_BYTES = 2 * 1024 * 1024;
     private static final int LEAK_INTERVAL_SECONDS = 1;
 
     @PostConstruct
@@ -78,6 +80,12 @@ public class F5SlowMemoryLeakFault implements Fault {
             
             if (executor != null) {
                 executor.shutdownNow();
+                try {
+                    executor.awaitTermination(2,TimeUnit.MILLISECONDS);
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
                 executor = null;
             }
             
@@ -87,28 +95,49 @@ public class F5SlowMemoryLeakFault implements Fault {
             
             // Suggest a GC to reclaim memory
             System.gc();
+            log.info("F5: Container Cleared. CG Hint Issued. Please Allow Stabilisation before the next Trial Begins ---");
         }
     }
 
     private void leakMemory() {
         if (!active.get() || criticallyFull.get()) return;
-        
+
+        Runtime runtime = Runtime.getRuntime();
+        long usedMemory = runtime.totalMemory() - runtime.freeMemory();
+        long maxMemory = runtime.maxMemory();
+        double heapUsageRatio = (double) usedMemory / maxMemory;
+
+        if (heapUsageRatio >= HEAP_SAFETY_CEILING) {
+            if (!criticallyFull.getAndSet(true)) {
+                log.warn("F5: Heap ceiling reached ({}% of {}MB max). " +
+                                "Halting allocations. Pod protected from OOMKill. " +
+                                "Fault active — degraded heap state maintained.",
+                        (int)(heapUsageRatio * 100), maxMemory / (1024 * 1024));
+            }
+            return;
+        }
+
         try {
             byte[] chunk = new byte[LEAK_SIZE_BYTES];
-            // Fill with data to ensure pages are actually allocated
             for (int i = 0; i < chunk.length; i += 4096) {
                 chunk[i] = 1;
             }
-            
             leakContainer.add(chunk);
             long total = leakedBytes.addAndGet(LEAK_SIZE_BYTES);
-            
-            log.debug("F5: Leaked {} bytes. Total leaked: {} MB", 
-                    LEAK_SIZE_BYTES, total / (1024 * 1024));
-            
+            log.debug("F5: Leaked {}MB total. Heap {}% full.",
+                    total / (1024 * 1024), (int)(heapUsageRatio * 100));
+
         } catch (OutOfMemoryError e) {
-            log.error("F5: Memory leak reached critical limit (OutOfMemoryError). Stopping further allocations.");
+            log.error("F5: Unexpected OOM despite watermark guard. Self-terminating.");
             criticallyFull.set(true);
+            active.set(false);
+        }
+    }
+
+    @PreDestroy
+    public void cleanUp() {
+        if (active.get()) {
+            deactivate();
         }
     }
 }
