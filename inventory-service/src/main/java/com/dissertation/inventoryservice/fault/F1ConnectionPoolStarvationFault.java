@@ -22,9 +22,10 @@ public class F1ConnectionPoolStarvationFault implements Fault {
     private final FaultRegistry registry;
     private final DataSource dataSource;
     private final AtomicBoolean active = new AtomicBoolean(false);
-    private final AtomicBoolean activating = new AtomicBoolean(false);
+
     private final List<Connection> heldConnections = new CopyOnWriteArrayList<>();
     private final ExecutorService acquisitionExecutor = Executors.newFixedThreadPool(10);
+    private  ScheduledExecutorService backgroundStealer;
 
     @PostConstruct
     public void init() {
@@ -54,63 +55,62 @@ public class F1ConnectionPoolStarvationFault implements Fault {
             throw new IllegalStateException("DataSource is not a HikariDataSource");
         }
 
-        activating.set(true);
-        int poolSize = hikariDataSource.getHikariConfigMXBean().getMaximumPoolSize();
-        log.info("F1: Attempting deterministic activation (target: {} connections)", poolSize);
+        int maxPoolSize = hikariDataSource.getHikariConfigMXBean().getMaximumPoolSize();
+        log.info("F1: Activating starvation. Max pool size is {}", maxPoolSize);
+        active.set(true);
 
-        List<Connection> batch = new ArrayList<>();
-        try {
-            for (int i = 0; i < poolSize; i++) {
-                // Try to acquire each connection with a short timeout to keep endpoint responsive
-                Connection conn = tryGetConnection(500); 
-                if (conn == null) {
-                    throw new RuntimeException("Could not acquire connection " + (i + 1) + " of " + poolSize + ". Pool might be already saturated.");
+        // Start a background thread that aggresively steals any released connection
+        backgroundStealer = Executors.newSingleThreadScheduledExecutor();
+        backgroundStealer.scheduleAtFixedRate(()->{
+            if(heldConnections.size()<maxPoolSize) {
+                Connection conn = tryGetConnection(100);
+                if (conn != null) {
+                    heldConnections.add(conn);
+                    log.info("F1 Leak: Stole a connection. Now holding {}/{} ", heldConnections.size(), maxPoolSize);
+                } else {
+                    log.debug("F1: Pool is fully starved");
                 }
-                batch.add(conn);
-                log.debug("F1: Acquired connection {}/{}", batch.size(), poolSize);
             }
-
-            heldConnections.addAll(batch);
-            active.set(true);
-            log.info("F1: Activation successful. Pool starved with {} connections.", heldConnections.size());
-
-        } catch (Exception e) {
-            log.error("F1: Activation failed - {}. Rolling back {} connections.", e.getMessage(), batch.size());
-            batch.forEach(this::closeQuietly);
-            active.set(false);
-            throw new RuntimeException(e.getMessage());
-        } finally {
-            activating.set(false);
-        }
+            }, 0, 50, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public synchronized void deactivate() {
-        if (active.compareAndSet(true, false)) {
-            log.info("Deactivating F1: Releasing {} connections", heldConnections.size());
-            heldConnections.forEach(this::closeQuietly);
-            heldConnections.clear();
+        // Check if its actually active first
+        if(!active.get()) return;
+
+        // 1. Stop stealing new connections
+        if(backgroundStealer!=null) {
+            backgroundStealer.shutdown();
         }
+        //2. Release everything we hold
+
+        log.info("Deactivating F1: Releasing {} connections", heldConnections.size());
+        heldConnections.forEach(this::closeQuietly);
+        heldConnections.clear();
+        // Now set to false when it is cleared out
+        active.set(false);
     }
 
     private Connection tryGetConnection(long timeoutMs) {
-        try {
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    Connection conn = dataSource.getConnection();
-                    // If activation was cancelled/rolled back while we were waiting, close the connection immediately
-                    if (!activating.get()) {
-                        closeQuietly(conn);
-                        return null;
-                    }
-                    return conn;
-                } catch (SQLException e) {
-                    return null;
-                }
-            }, acquisitionExecutor).get(timeoutMs, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            return null;
-        }
+       CompletableFuture<Connection> future = CompletableFuture.supplyAsync(()->{
+           try {
+               return dataSource.getConnection();
+           }catch (SQLException e) {
+              return null;
+           }
+       }, acquisitionExecutor);
+
+       try {
+           return future.get(timeoutMs,TimeUnit.MILLISECONDS);
+       }catch (TimeoutException e){
+           // If we timed out, but the future eventually gets a connection later, close it now.
+           future.thenAccept(this::closeQuietly);
+           return null;
+       } catch (InterruptedException | ExecutionException e) {
+           future.thenAccept(this::closeQuietly);
+           return null;
+       }
     }
 
     private void closeQuietly(Connection conn) {

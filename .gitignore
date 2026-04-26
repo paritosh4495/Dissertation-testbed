@@ -41,6 +41,5 @@ build/
 
 #####
 /GEMINI.md
-/ProjectProposal__Iteration8.md
 /deployment/docker-compose/postgres-data
 /deployment/docker-compose/postgres-data/**

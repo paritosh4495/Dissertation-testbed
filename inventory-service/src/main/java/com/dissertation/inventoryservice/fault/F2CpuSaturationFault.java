@@ -42,7 +42,7 @@ public class F2CpuSaturationFault implements Fault {
     public synchronized void activate() {
         if (active.compareAndSet(false, true)) {
             int cores = Runtime.getRuntime().availableProcessors();
-            int threadCount = cores * 4; // Increased multiplier for container saturation
+            int threadCount = cores * 4;
             log.info("Activating F2: Spawning {} worker threads", threadCount);
             
             for (int i = 0; i < threadCount; i++) {
@@ -68,7 +68,6 @@ public class F2CpuSaturationFault implements Fault {
     private void cpuIntensiveTask() {
         double val = 1.1;
         while (active.get() && !Thread.currentThread().isInterrupted()) {
-            // Deterministic CPU-bound task using local variables
             val = Math.tan(Math.atan(val));
         }
     }

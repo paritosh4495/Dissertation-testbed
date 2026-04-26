@@ -63,10 +63,7 @@ public class F4ThreadPoolExhaustionFault implements Fault {
         }
     }
 
-    /**
-     * Attempts to block the current thread if the fault is active and there is capacity in the trap.
-     * @return true if the thread was blocked and then released, false if it wasn't blocked.
-     */
+
     public boolean tryBlock() {
         if (!active.get()) {
             return false;

@@ -114,6 +114,7 @@ public class OrderControllerTest extends AbstractIT {
                 .body("[0].orderNumber", startsWith("ORD-"));
     }
 
+
     @Test
     void shouldCreateOrderSuccessfully() {
         OrderItemDto item = OrderItemDto.builder()
@@ -157,6 +158,8 @@ public class OrderControllerTest extends AbstractIT {
                 .body("items[0].productCode", equalTo("BK-123"))
                 .body("items[0].unitPrice", equalTo(29.99f));
     }
+
+
 
     @Test
     void shouldFailOrderWhenStockReservationFails() {
