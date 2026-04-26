@@ -109,22 +109,22 @@ public class OrderServiceImpl implements OrderService {
                     order.setStatus(OrderStatus.PAYMENT_FAILED);
                 }
                 
-            }
-            catch (CallNotPermittedException e){
+            } catch (CallNotPermittedException e) {
                 // Circuit breaker is OPEN - payment-service is likely down
                 log.error("Payment service unavailable for order {}: {}", orderNumber, e.getMessage());
                 inventoryClient.releaseStock(stockRequest);
                 order.setStatus(OrderStatus.PAYMENT_FAILED);
                 orderRepository.save(order);
-                throw e;
-            }
-
-            catch (Exception e) {
+                throw e; // Rethrow to be caught by GlobalExceptionHandler
+            } catch (Exception e) {
                 log.error("Payment failed for order {}: {}", orderNumber, e.getMessage());
                 inventoryClient.releaseStock(stockRequest);
                 order.setStatus(OrderStatus.PAYMENT_FAILED);
             }
 
+        } catch (CallNotPermittedException e) {
+            // Re-throw if it was already caught in the inner block
+            throw e;
         } catch (Exception e) {
             log.error("Error during order creation flow for {}: {}", orderNumber, e.getMessage());
             order.setStatus(OrderStatus.INVENTORY_REJECTED);
