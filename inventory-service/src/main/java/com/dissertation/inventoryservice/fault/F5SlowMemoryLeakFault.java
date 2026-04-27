@@ -81,7 +81,7 @@ public class F5SlowMemoryLeakFault implements Fault {
             if (executor != null) {
                 executor.shutdownNow();
                 try {
-                    executor.awaitTermination(2,TimeUnit.MILLISECONDS);
+                    executor.awaitTermination(2,TimeUnit.SECONDS);
                 }
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
