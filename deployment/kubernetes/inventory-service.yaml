@@ -25,7 +25,7 @@ spec:
         - name: DB_PASSWORD
           value: postgres
         - name: _JAVA_OPTIONS
-          value: "-Xms512m -Xmx512m" # JVM heap size to 512MB
+          value: "-Xms512m -Xmx512m -XX:MaxDirectMemorySize=1g" # JVM heap size to 512MB
         ports:
         - containerPort: 8081
         resources:
