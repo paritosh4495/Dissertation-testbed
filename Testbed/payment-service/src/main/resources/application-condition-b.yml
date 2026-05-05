@@ -1,4 +1,4 @@
-clogging:
+logging:
   structured:
     format:
       console: ecs
