@@ -6,12 +6,12 @@ on:
     branches:
       - main
     paths:
-      - payment-service/**
+      - ../../Testbed/payment-service
   pull_request:
     branches:
       - main
     paths:
-      - payment-service/**
+      - ../../Testbed/payment-service
 
 
 jobs:

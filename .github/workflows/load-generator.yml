@@ -6,12 +6,12 @@ on:
     branches:
       - main
     paths:
-      - load-generator/**
+      - ../../Testbed/load-generator
   pull_request:
     branches:
       - main
     paths:
-      - load-generator/**
+      - ../../Testbed/load-generator
 
 jobs:
   docker:

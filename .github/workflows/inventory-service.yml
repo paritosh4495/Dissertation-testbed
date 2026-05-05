@@ -6,12 +6,12 @@ on:
     branches:
       - main
     paths:
-      - inventory-service/**
+      - ../../Testbed/inventory-service
   pull_request:
     branches:
       - main
     paths:
-      - inventory-service/**
+      - ../../Testbed/inventory-service
 
 
 jobs:

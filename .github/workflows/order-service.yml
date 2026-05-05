@@ -6,12 +6,12 @@ on:
     branches:
       - main
     paths:
-      - order-service/**
+      - ../../Testbed/order-service
   pull_request:
     branches:
       - main
     paths:
-      - order-service/**
+      - ../../Testbed/order-service
 
 
 jobs:
