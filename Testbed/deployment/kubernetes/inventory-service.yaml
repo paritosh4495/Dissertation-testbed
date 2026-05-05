@@ -59,6 +59,9 @@ spec:
   selector:
     app: inventory-service
   ports:
-  - port: 8081
+  - name: http
+    port: 8081
     targetPort: 8081
-  type: ClusterIP
+    nodePort: 30081
+  type: NodePort
+

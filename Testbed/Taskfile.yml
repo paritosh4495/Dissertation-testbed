@@ -60,7 +60,7 @@ tasks:
   kube_start:
     desc: "Start the Local Minikube Kubernetes Cluster"
     cmds:
-      - "minikube start --driver=docker --cpus=4 --memory=8192"
+      - "minikube start --driver=docker --cpus=4 --memory=4096 --ports=30081:30081,30082:30082,30083:30083"
       - "minikube addons enable metrics-server"
 
   kube_stop:

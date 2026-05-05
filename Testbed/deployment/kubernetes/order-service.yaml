@@ -63,6 +63,8 @@ spec:
   selector:
     app: order-service
   ports:
-  - port: 8082
-    targetPort: 8082
-  type: ClusterIP
+    - name: http
+      port: 8082
+      targetPort: 8082
+      nodePort: 30082
+  type: NodePort
