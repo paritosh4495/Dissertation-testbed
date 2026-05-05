@@ -1,0 +1,17 @@
+logging:
+  structured:
+    format:
+      console: ecs
+  level:
+    root: INFO
+    com.dissertation: INFO
+
+    # Hide experiment/fault-injection internals
+    com.dissertation.inventoryservice.fault: WARN
+
+    # Narrow suppression of framework-native observability leakage
+    org.springframework.boot.actuate: WARN
+    io.micrometer: WARN
+    io.prometheus: WARN
+    io.github.resilience4j: WARN
+    com.zaxxer.hikari: WARN
