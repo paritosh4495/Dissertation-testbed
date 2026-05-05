@@ -2,12 +2,6 @@ spring:
   application:
     name: payment-service
 
-  # STRUCTURED LOGGING
-  logging:
-    structured:
-      format:
-        console: ecs
-
 server:
   port: 8083
   shutdown: graceful

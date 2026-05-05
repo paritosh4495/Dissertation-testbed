@@ -7,7 +7,7 @@ logging:
     com.dissertation: INFO
 
     # Hide experiment/fault-injection internals
-    com.dissertation.inventoryservice.fault: ERROR
+    com.dissertation.paymentservice.fault: ERROR
 
     # Narrow suppression of framework-native observability leakage
     org.springframework.boot.actuate: WARN

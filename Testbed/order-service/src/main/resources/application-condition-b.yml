@@ -7,7 +7,7 @@ logging:
     com.dissertation: INFO
 
     # Hide experiment/fault-injection internals
-    com.dissertation.inventoryservice.fault: ERROR
+    com.dissertation.orderservice.fault: ERROR
 
     # Keep framework-native areas at normal visibility
     org.springframework.boot.actuate: INFO

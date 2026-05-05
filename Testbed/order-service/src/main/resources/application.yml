@@ -22,12 +22,6 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
-    # STRUCTURED LOGGING
-    logging:
-      structured:
-        format:
-          console: ecs
-
 order:
   inventory-service-url: http://localhost:8081
   payment-service-url: http://localhost:8083
