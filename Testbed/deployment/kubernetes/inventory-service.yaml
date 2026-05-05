@@ -18,6 +18,8 @@ spec:
         image: paritosh4495/csc8499-inventory-service:latest
         imagePullPolicy: Always
         env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "condition-a"  # THE Harness will set this to condition-a, or b based on the condition scenario
         - name: DB_URL
           value: jdbc:postgresql://postgres-db:5432/inventory
         - name: DB_USERNAME
