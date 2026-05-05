@@ -6,12 +6,12 @@ on:
     branches:
       - main
     paths:
-      - ../../Testbed/payment-service
+      - Testbed/payment-service/**
   pull_request:
     branches:
       - main
     paths:
-      - ../../Testbed/payment-service
+      - Testbed/payment-service/**
 
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./payment-service
+        working-directory: ./Testbed/payment-service
     steps:
       - uses: actions/checkout@v5
       - name: Setup Java 25
@@ -42,7 +42,7 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     defaults:
       run:
-        working-directory: ./payment-service
+        working-directory: ./Testbed/payment-service
     env:
       DOCKER_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/csc8499-payment-service
     steps:

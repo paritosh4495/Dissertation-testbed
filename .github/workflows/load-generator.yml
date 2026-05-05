@@ -6,12 +6,12 @@ on:
     branches:
       - main
     paths:
-      - ../../Testbed/load-generator
+      - Testbed/load-generator/**
   pull_request:
     branches:
       - main
     paths:
-      - ../../Testbed/load-generator
+      - Testbed/load-generator/**
 
 jobs:
   docker:
@@ -35,7 +35,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: ./load-generator
+          context: ./Testbed/load-generator
           push: true
           tags: |
             ${{ env.DOCKER_IMAGE_NAME }}:latest

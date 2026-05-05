@@ -13,7 +13,7 @@ BROWSE_INTERVAL = float(os.getenv("BROWSE_INTERVAL", "0.2"))
 ORDER_INTERVAL = float(os.getenv("ORDER_INTERVAL", "2.0"))
 TIMEOUT = 5.0
 
-# Payload for placing orders
+# Payload for placing orders (assuming a simple structure for demonstration)
 ORDER_PAYLOAD = {
     "customerId": "CUST-LOADGEN",
     "items": [{"productCode": "BK-LOADGEN", "quantity": 1}]
