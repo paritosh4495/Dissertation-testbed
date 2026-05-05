@@ -41,6 +41,8 @@ build/
 
 
 #####
+.gemini
 /GEMINI.md
 /deployment/docker-compose/postgres-data
 /deployment/docker-compose/postgres-data/**
+/Agent/.env
