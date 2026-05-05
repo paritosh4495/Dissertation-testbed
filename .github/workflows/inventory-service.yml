@@ -6,13 +6,12 @@ on:
     branches:
       - main
     paths:
-      - ../../Testbed/inventory-service
+      - Testbed/inventory-service/**
   pull_request:
     branches:
       - main
     paths:
-      - ../../Testbed/inventory-service
-
+      - Testbed/inventory-service/**
 
 jobs:
   ci:
@@ -20,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./inventory-service
+        working-directory: ./Testbed/inventory-service
     steps:
       - uses: actions/checkout@v5
       - name: Setup Java 25
@@ -31,8 +30,8 @@ jobs:
           cache: 'maven'
       - name: Build with Maven
         run: |
-          chmod +x ../mvnw
-          ../mvnw -ntp verify 
+          chmod +x ../../mvnw
+          ../../mvnw -ntp verify 
           
 
   docker:
@@ -42,7 +41,7 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     defaults:
       run:
-        working-directory: ./inventory-service
+        working-directory: ./Testbed/inventory-service
     env:
       DOCKER_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/csc8499-inventory-service
     steps:
@@ -60,8 +59,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push Docker Image
         run: |
-          chmod +x ../mvnw
-          ../mvnw -ntp spring-boot:build-image -DskipTests \
+          chmod +x ../../mvnw
+          ../../mvnw -ntp spring-boot:build-image -DskipTests \
             -Dspring-boot.build-image.imageName=${{ env.DOCKER_IMAGE_NAME }}:latest
           docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
 
