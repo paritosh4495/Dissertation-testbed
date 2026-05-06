@@ -27,3 +27,5 @@ python-dotenv
 pydantic
 tiktoken
 
+# Development / testing
+pytest
