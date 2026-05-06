@@ -92,3 +92,17 @@ HTTP_TIMEOUT = 10
 CONDITION_A = "A"
 CONDITION_B = "B"
 VALID_CONDITIONS: frozenset[str] = frozenset({CONDITION_A, CONDITION_B})
+
+
+# Actuator HTTP access (Condition B tools)
+
+
+ACTUATOR_BASE_HOST: str = "127.0.0.1" # Minikube NodePorts are accessed via localhost from the host machine.
+
+ACTUATOR_NODE_PORTS: dict[str, int] = {
+    "inventory-service": 30081,
+    "order-service":     30082,
+    "payment-service":   30083,
+}
+
+ACTUATOR_DEFAULT_TIMEOUT: int = 5  # seconds
