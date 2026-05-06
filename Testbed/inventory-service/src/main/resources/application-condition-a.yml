@@ -9,7 +9,11 @@ logging:
     # Hide experiment/fault-injection internals
     com.dissertation.inventoryservice.fault: ERROR
 
+
+
     # Narrow suppression of framework-native observability leakage
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: ERROR
+    org.hibernate.engine.jdbc: ERROR  # catches any other jdbc sub-loggers
     org.springframework.boot.actuate: WARN
     io.micrometer: WARN
     io.prometheus: WARN
