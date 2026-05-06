@@ -1,0 +1,29 @@
+# LangChain
+
+langchain
+langchain-core
+langchain-community
+
+# LangGraph
+
+langgraph
+
+
+# Open AI 
+
+langchain-openai
+
+
+
+# kubernetes
+
+kubernetes
+
+
+# other dependencies
+
+requests
+python-dotenv
+pydantic
+tiktoken
+
